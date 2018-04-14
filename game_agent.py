@@ -4,6 +4,8 @@ and include the results in your report.
 """
 import random
 
+from abc import ABC, abstractmethod
+
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -133,6 +135,33 @@ class IsolationPlayer(ABC):
         self.score = score_fn
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
+
+    @abstractmethod
+    def get_move(self, game, time_left):
+        """Get next best legal move before timeout expires
+
+        Search for the best move from the available legal moves and return a
+        result before the time limit expires.
+
+        Parameters
+        ----------
+        game: isolation.Board
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+
+        time_left: callable
+            A function that returns the number of milliseconds left in the
+            current turn. Returning with any less than 0 ms remaining forfeits
+            the game.
+
+        Returns
+        -------
+        move : (int, int)
+            Board coordinates corresponding to a legal move; may return
+            (-1, -1) if there are no available legal moves.
+
+        """
+        raise NotImplementedError
 
 
 class MinimaxPlayer(IsolationPlayer):
