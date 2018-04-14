@@ -4,6 +4,8 @@ and include the results in your report.
 """
 import random
 
+from abc import ABC, abstractmethod
+
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -108,6 +110,7 @@ class IsolationPlayer(ABC):
         Time threshold when the player should stop
     """
 
+    @abstractmethod
     def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         """IsolationPlayer abstract constructor
 
@@ -134,6 +137,33 @@ class IsolationPlayer(ABC):
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
 
+    @abstractmethod
+    def get_move(self, game, time_left):
+        """Get next best legal move before timeout expires
+
+        Search for the best move from the available legal moves and return a
+        result before the time limit expires.
+
+        Parameters
+        ----------
+        game: isolation.Board
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+
+        time_left: callable
+            A function that returns the number of milliseconds left in the
+            current turn. Returning with any less than 0 ms remaining forfeits
+            the game.
+
+        Returns
+        -------
+        move : (int, int)
+            Board coordinates corresponding to a legal move; may return
+            (-1, -1) if there are no available legal moves.
+
+        """
+        raise NotImplementedError
+
 
 class MinimaxPlayer(IsolationPlayer):
     """Agent powered by depth-limited minimax search
@@ -142,6 +172,9 @@ class MinimaxPlayer(IsolationPlayer):
     search. You must finish and test this player to make sure it properly uses
     minimax to return a good move before the search time limit expires.
     """
+
+    def __init__(self, search_depth, score_fn, timeout):
+        super().__init__(search_depth, score_fn, timeout)
 
     def get_move(self, game, time_left):
         """Get next best legal move before timeout expires
@@ -239,6 +272,9 @@ class AlphaBetaPlayer(IsolationPlayer):
     search with alpha-beta pruning. You must finish and test this player to
     make sure it returns a good move before the search time limit expires.
     """
+
+    def __init__(self, search_depth, score_fn, timeout):
+        super().__init__(search_depth, score_fn, timeout)
 
     def get_move(self, game, time_left):
         """Get next best legal move before timeout expires
