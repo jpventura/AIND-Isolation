@@ -21,17 +21,17 @@ def custom_score(game, player):
 
     Parameters
     ----------
-    game : `isolation.Board`
+    game : isolation.Board
         An instance of `isolation.Board` encoding the current state of the
         game (e.g., player locations and blocked cells).
 
-    player : object
+    player : IsolationPlayer
         A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+        one of the player objects `game.__player_1__` or `game.__player_2__`).
 
     Returns
     -------
-    float
+    value: float
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
@@ -47,17 +47,17 @@ def custom_score_2(game, player):
 
     Parameters
     ----------
-    game : `isolation.Board`
+    game : isolation.Board
         An instance of `isolation.Board` encoding the current state of the
         game (e.g., player locations and blocked cells).
 
-    player : object
+    player : IsolationPlayer
         A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+        one of the player objects `game.__player_1__` or `game.__player_2__`).
 
     Returns
     -------
-    float
+    value: float
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
@@ -79,7 +79,7 @@ def custom_score_3(game, player):
 
     player : object
         A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+        one of the player objects `game.__player_1__` or `game.__player_2__`).
 
     Returns
     -------
@@ -90,29 +90,45 @@ def custom_score_3(game, player):
     raise NotImplementedError
 
 
-class IsolationPlayer:
-    """Base class for minimax and alphabeta agents -- this class is never
-    constructed or tested directly.
+class IsolationPlayer(ABC):
+    """Base class for minimax and alpha-beta agents.
 
-    ********************  DO NOT MODIFY THIS CLASS  ********************
-
-    Parameters
+    Attributes
     ----------
-    search_depth : int (optional)
-        A strictly positive integer (i.e., 1, 2, 3,...) for the number of
-        layers in the game tree to explore for fixed-depth search. (i.e., a
-        depth of one (1) would only explore the immediate sucessors of the
-        current state.)
+    search_depth : int
+        Depth limit of player agent search
 
-    score_fn : callable (optional)
-        A function to use for heuristic evaluation of game states.
+    score : callable
+        Function to calculate score over remaining legal moves
 
-    timeout : float (optional)
-        Time remaining (in milliseconds) when search is aborted. Should be a
-        positive value large enough to allow the function to return before the
-        timer expires.
+    time_left : int
+        Remaining time to player search for a solution
+
+    TIMER_THRESHOLD: float
+        Time threshold when the player should stop
     """
+
     def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
+        """IsolationPlayer abstract constructor
+
+        Abstract construct ensuring class is never constructed/tested directly
+
+        Parameters
+        ----------
+        search_depth : int, optional
+            A strictly positive integer (i.e., 1, 2, 3,...) for the number of
+            layers in the game tree to explore for fixed-depth search. (i.e., a
+            depth of one (1) would only explore the immediate successors of the
+            current state.)
+
+        score_fn : callable, optional
+            A function to use for heuristic evaluation of game states.
+
+        timeout : float, optional
+            Time remaining (in milliseconds) when search is aborted. Should be a
+            positive value large enough to allow the function to return before the
+            timer expires.
+        """
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
@@ -120,16 +136,15 @@ class IsolationPlayer:
 
 
 class MinimaxPlayer(IsolationPlayer):
-    """Game-playing agent that chooses a move using depth-limited minimax
+    """Agent powered by depth-limited minimax search
+
+    Game-playing agent that chooses a move using depth-limited minimax
     search. You must finish and test this player to make sure it properly uses
     minimax to return a good move before the search time limit expires.
     """
 
     def get_move(self, game, time_left):
-        """Search for the best move from the available legal moves and return a
-        result before the time limit expires.
-
-        **************  YOU DO NOT NEED TO MODIFY THIS FUNCTION  *************
+        """Get next best legal move before timeout expires
 
         For fixed-depth search, this function simply wraps the call to the
         minimax method, but this method provides a common interface for all
@@ -138,7 +153,7 @@ class MinimaxPlayer(IsolationPlayer):
 
         Parameters
         ----------
-        game : `isolation.Board`
+        game : isolation.Board
             An instance of `isolation.Board` encoding the current state of the
             game (e.g., player locations and blocked cells).
 
@@ -149,9 +164,10 @@ class MinimaxPlayer(IsolationPlayer):
 
         Returns
         -------
-        (int, int)
+        move : (int, int)
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
+
         """
         self.time_left = time_left
 
@@ -194,7 +210,7 @@ class MinimaxPlayer(IsolationPlayer):
 
         Returns
         -------
-        (int, int)
+        move : (int, int)
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
 
@@ -217,27 +233,22 @@ class MinimaxPlayer(IsolationPlayer):
 
 
 class AlphaBetaPlayer(IsolationPlayer):
-    """Game-playing agent that chooses a move using iterative deepening minimax
+    """Agent powered by iterative deepening and alpha-beta pruning search
+
+    Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to
     make sure it returns a good move before the search time limit expires.
     """
 
     def get_move(self, game, time_left):
-        """Search for the best move from the available legal moves and return a
+        """Get next best legal move before timeout expires
+
+        Search for the best move from the available legal moves and return a
         result before the time limit expires.
-
-        Modify the get_move() method from the MinimaxPlayer class to implement
-        iterative deepening search instead of fixed-depth search.
-
-        **********************************************************************
-        NOTE: If time_left() < 0 when this function returns, the agent will
-              forfeit the game due to timeout. You must return _before_ the
-              timer reaches 0.
-        **********************************************************************
 
         Parameters
         ----------
-        game : `isolation.Board`
+        game : isolation.Board
             An instance of `isolation.Board` encoding the current state of the
             game (e.g., player locations and blocked cells).
 
@@ -248,16 +259,17 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         Returns
         -------
-        (int, int)
+        move : (int, int)
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
+
         """
         self.time_left = time_left
 
         # TODO: finish this function!
         raise NotImplementedError
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+    def alpha_beta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
         described in the lectures.
 
@@ -287,7 +299,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         Returns
         -------
-        (int, int)
+        move : (int, int)
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
 
