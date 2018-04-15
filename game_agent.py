@@ -7,6 +7,7 @@ import random
 from abc import ABC, abstractmethod
 
 NO_MOVE = (-1, -1)
+PHI = 1.618033988749895
 
 
 class SearchTimeout(Exception):
@@ -38,8 +39,16 @@ def custom_score(game, player):
     value: float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    elif game.is_winner(player):
+        return float("inf")
+
+    else:
+        agent_score = float(len(game.get_legal_moves(player)))
+        enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
+        return agent_score - 2*enemy_score
 
 
 def custom_score_2(game, player):
@@ -64,8 +73,18 @@ def custom_score_2(game, player):
     value: float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+
+    if game.is_loser(player):
+        return float("-inf")
+
+    elif game.is_winner(player):
+        return float("inf")
+
+    else:
+        # Aggressive strategy
+        agent_score = float(len(game.get_legal_moves(player)))
+        enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
+        return agent_score - PHI*enemy_score
 
 
 def custom_score_3(game, player):
@@ -90,8 +109,17 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    elif game.is_winner(player):
+        return float("inf")
+
+    else:
+        # Dummy strategy
+        agent_score = float(len(game.get_legal_moves(player)))
+        enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
+        return agent_score - enemy_score
 
 
 class IsolationPlayer(ABC):
