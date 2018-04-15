@@ -356,8 +356,10 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if IsolationPlayer.is_terminal(game):
+            return NO_MOVE
+
+        return self.iterative_deepening(game)
 
     def alpha_beta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -392,20 +394,70 @@ class AlphaBetaPlayer(IsolationPlayer):
         move : (int, int)
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
-
-        Notes
-        -----
-            (1) You MUST use the `self.score()` method for board evaluation
-                to pass the project tests; you cannot call any other evaluation
-                function directly.
-
-            (2) If you use any helper functions (e.g., as shown in the AIMA
-                pseudocode) then you must copy the timer check into the top of
-                each helper function or else your agent will timeout during
-                testing.
         """
+
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        _, best_move = self.max_value(game, depth, alpha, beta)
+
+        return best_move
+
+    def iterative_deepening(self, board):
+        best_move = random.choice(board.get_legal_moves())
+        depth = 1
+        try:
+            while True:
+                best_move = self.alpha_beta(board, depth=depth)
+                depth += 1
+        except SearchTimeout:
+            pass
+        finally:
+            return best_move
+
+    def max_value(self, game, depth, alpha, beta):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if IsolationPlayer.is_terminal(game) or depth <= 0:
+            return self.score(game, self), NO_MOVE
+
+        best_move = NO_MOVE
+        best_score = float('-inf')
+
+        if not IsolationPlayer.is_terminal(game):
+            best_move = random.choice(game.get_legal_moves())
+
+        for move in game.get_legal_moves():
+            score = self.min_value(game.forecast_move(move), depth - 1, alpha, beta)
+            if best_score < score:
+                best_score = score
+                best_move = move
+
+            if best_score >= beta:
+                return best_score, best_move
+
+            alpha = max(best_score, alpha)
+
+        return best_score, best_move
+
+    def min_value(self, game, depth, alpha, beta):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if IsolationPlayer.is_terminal(game) or depth <= 0:
+            return self.score(game, self)
+
+        best_score = float('inf')
+        legal_moves = game.get_legal_moves()
+
+        for move in legal_moves:
+            score, _ = self.max_value(game.forecast_move(move), depth - 1, alpha, beta)
+            best_score = min(best_score, score)
+
+            if best_score <= alpha:
+                return best_score
+
+            beta = min(best_score, beta)
+
+        return best_score
