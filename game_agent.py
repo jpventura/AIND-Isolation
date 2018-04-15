@@ -6,6 +6,8 @@ import random
 
 from abc import ABC, abstractmethod
 
+NO_MOVE = (-1, -1)
+
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -110,6 +112,21 @@ class IsolationPlayer(ABC):
         Time threshold when the player should stop
     """
 
+    @staticmethod
+    def is_terminal(board):
+        """
+        Parameters
+        ----------
+        board : isolation.Board
+            Current state of isolation game board
+
+        Returns
+        -------
+        state: bool
+            False if there are not further legal moves, True otherwise
+        """
+        return not bool(board.get_legal_moves())
+
     def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         """IsolationPlayer abstract constructor
 
@@ -200,20 +217,64 @@ class MinimaxPlayer(IsolationPlayer):
         """
         self.time_left = time_left
 
-        # Initialize the best move so that this function returns something
-        # in case the search fails due to timeout
-        best_move = (-1, -1)
-
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
             return self.minimax(game, self.search_depth)
 
         except SearchTimeout:
-            pass  # Handle any actions required after timeout as needed
+            # Handle any actions required after timeout as needed
+            return NO_MOVE
 
-        # Return the best move from the last completed search iteration
-        return best_move
+    def max_value(self, board, depth=100):
+        """
+        Parameters
+        ----------
+        board : isolation.Board
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+
+        depth : int
+            Depth search limit
+
+        Returns
+        -------
+            Maximum value over all legal child nodes, otherwise float('-inf')
+        """
+
+        if IsolationPlayer.is_terminal(board) or depth <= 0:
+            return self.score(board, self)
+
+        local_max = float("-inf")
+        for move in board.get_legal_moves():
+            local_max = max(local_max, self.min_value(board.forecast_move(move), depth - 1))
+
+        return local_max
+
+    def min_value(self, board, depth=100):
+        """
+        Parameters
+        ----------
+        board : isolation.Board
+            An instance of `isolation.Board` encoding the current state of the
+            game (e.g., player locations and blocked cells).
+
+        depth : int
+            Depth search limit
+
+        Returns
+        -------
+            Minimum value over all legal child nodes, otherwise float('inf')
+        """
+
+        if IsolationPlayer.is_terminal(board) or depth <= 0:
+            return self.score(board, self)
+
+        local_min = float("inf")
+        for move in board.get_legal_moves():
+            local_min = max(local_min, self.min_value(board.forecast_move(move), depth - 1))
+
+        return local_min
 
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
@@ -242,23 +303,23 @@ class MinimaxPlayer(IsolationPlayer):
         move : (int, int)
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
-
-        Notes
-        -----
-            (1) You MUST use the `self.score()` method for board evaluation
-                to pass the project tests; you cannot call any other evaluation
-                function directly.
-
-            (2) If you use any helper functions (e.g., as shown in the AIMA
-                pseudocode) then you must copy the timer check into the top of
-                each helper function or else your agent will timeout during
-                testing.
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if IsolationPlayer.is_terminal(game):
+            return NO_MOVE
+
+        best_score = float("-inf")
+        best_move = None
+
+        for move in game.get_legal_moves():
+            score = self.min_value(game.forecast_move(move), depth - 1)
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+        return best_move
 
 
 class AlphaBetaPlayer(IsolationPlayer):
