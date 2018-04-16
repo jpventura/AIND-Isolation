@@ -48,7 +48,7 @@ def custom_score(game, player):
     else:
         agent_score = float(len(game.get_legal_moves(player)))
         enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
-        return agent_score - 2*enemy_score
+        return agent_score - PHI * enemy_score
 
 
 def custom_score_2(game, player):
@@ -84,7 +84,7 @@ def custom_score_2(game, player):
         # Aggressive strategy
         agent_score = float(len(game.get_legal_moves(player)))
         enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
-        return agent_score - PHI*enemy_score
+        return agent_score - 2 * enemy_score
 
 
 def custom_score_3(game, player):
