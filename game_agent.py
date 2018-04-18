@@ -84,7 +84,7 @@ def custom_score_2(game, player):
         # Aggressive strategy
         agent_score = float(len(game.get_legal_moves(player)))
         enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
-        return agent_score - 2 * enemy_score
+        return agent_score - enemy_score
 
 
 def custom_score_3(game, player):
@@ -119,7 +119,7 @@ def custom_score_3(game, player):
         # Dummy strategy
         agent_score = float(len(game.get_legal_moves(player)))
         enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
-        return agent_score - enemy_score
+        return return agent_score/enemy_score
 
 
 class IsolationPlayer(ABC):
