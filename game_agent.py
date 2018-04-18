@@ -4,11 +4,8 @@ and include the results in your report.
 """
 import random
 
-from abc import ABC, abstractmethod
-
 NO_MOVE = (-1, -1)
 PHI = 1.618033988749895
-
 
 class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
@@ -84,7 +81,7 @@ def custom_score_2(game, player):
         # Aggressive strategy
         agent_score = float(len(game.get_legal_moves(player)))
         enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
-        return agent_score - enemy_score
+        return agent_score - 2 * enemy_score
 
 
 def custom_score_3(game, player):
@@ -119,10 +116,10 @@ def custom_score_3(game, player):
         # Dummy strategy
         agent_score = float(len(game.get_legal_moves(player)))
         enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
-        return return agent_score/enemy_score
+        return agent_score/enemy_score
 
 
-class IsolationPlayer(ABC):
+class IsolationPlayer(object):
     """Base class for minimax and alpha-beta agents.
 
     Attributes
@@ -181,7 +178,6 @@ class IsolationPlayer(ABC):
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
 
-    @abstractmethod
     def get_move(self, game, time_left):
         """Get next best legal move before timeout expires
 
@@ -254,7 +250,7 @@ class MinimaxPlayer(IsolationPlayer):
             # Handle any actions required after timeout as needed
             return NO_MOVE
 
-    def max_value(self, board, depth=100):
+    def max_value(self, board, depth):
         """
         Parameters
         ----------
@@ -269,6 +265,8 @@ class MinimaxPlayer(IsolationPlayer):
         -------
             Maximum value over all legal child nodes, otherwise float('-inf')
         """
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
 
         if IsolationPlayer.is_terminal(board) or depth <= 0:
             return self.score(board, self)
@@ -279,7 +277,7 @@ class MinimaxPlayer(IsolationPlayer):
 
         return local_max
 
-    def min_value(self, board, depth=100):
+    def min_value(self, board, depth):
         """
         Parameters
         ----------
@@ -295,12 +293,17 @@ class MinimaxPlayer(IsolationPlayer):
             Minimum value over all legal child nodes, otherwise float('inf')
         """
 
+        # FIXME: This timeout check should not be required,
+        # but Udacity test is failing
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
         if IsolationPlayer.is_terminal(board) or depth <= 0:
             return self.score(board, self)
 
         local_min = float("inf")
         for move in board.get_legal_moves():
-            local_min = max(local_min, self.min_value(board.forecast_move(move), depth - 1))
+            local_min = min(local_min, self.max_value(board.forecast_move(move), depth - 1))
 
         return local_min
 
@@ -343,7 +346,7 @@ class MinimaxPlayer(IsolationPlayer):
 
         for move in game.get_legal_moves():
             score = self.min_value(game.forecast_move(move), depth - 1)
-            if score > best_score:
+            if score >= best_score:
                 best_score = score
                 best_move = move
 
@@ -389,7 +392,7 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         return self.iterative_deepening(game)
 
-    def alpha_beta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
         described in the lectures.
 
@@ -436,7 +439,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         depth = 1
         try:
             while True:
-                best_move = self.alpha_beta(board, depth=depth)
+                best_move = self.alphabeta(board, depth=depth)
                 depth += 1
         except SearchTimeout:
             pass
