@@ -2,6 +2,7 @@
 test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
 """
+import math
 import random
 
 NO_MOVE = (-1, -1)
@@ -81,7 +82,7 @@ def custom_score_2(game, player):
         # Aggressive strategy
         agent_score = float(len(game.get_legal_moves(player)))
         enemy_score = float(len(game.get_legal_moves(game.get_opponent(player))))
-        return agent_score - 2 * enemy_score
+        return agent_score**2 - enemy_score**2
 
 
 def custom_score_3(game, player):
